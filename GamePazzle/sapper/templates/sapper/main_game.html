@@ -1,0 +1,134 @@
+{% extends 'sapper/pattern.html' %}
+{% load static %}
+{% block title %}Sapper{% endblock %}
+{% block main%}
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <style>
+        error, win{
+            display: block;
+            position: relative;
+            left: 50%;
+            top: 50%;
+            width: 300px;
+        }
+
+        error p{
+            font-size: 25px;
+            font-family: 'Impact';
+            color: red;
+        }
+
+        win p{
+            font-size: 25px;
+            font-family: 'Impact';
+            color: #00ff00;
+        }
+
+        .gameImg div{
+            position: absolute;
+            height: 50px;
+            width: 50px;
+        }
+        .gameImg{
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, 0)
+        }
+        .gameImg div p{
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 25px;
+            font-family: 'Impact'
+        }
+
+
+    </style>
+    <script type="text/javascript">
+        var pole = {{pole}}
+
+        function c(i, j, pole){
+            var v = pole[i][j];
+            $('.cell'+i+'_'+j).append('<p>'+v+'</p>');
+            $('.cell'+i+'_'+j).css('background-color', '#E5C29F');
+            if(v === 0){
+                if(i-1>=0) if($('.cell'+(i-1)+'_'+j).css('background-color') !== 'rgb(229, 194, 159)') c(i-1,j,pole);
+                if(j-1>=0) if($('.cell'+i+'_'+(j-1)).css('background-color') !== 'rgb(229, 194, 159)') c(i,j-1,pole);
+                if(i+1<{{w}}) if($('.cell'+(i+1)+'_'+j).css('background-color') !== 'rgb(229, 194, 159)') c(i+1,j,pole);
+                if(j+1<{{h}}) if($('.cell'+i+'_'+(j+1)).css('background-color') !== 'rgb(229, 194, 159)') c(i,j+1,pole);
+            }
+        }
+
+        function f(i, j, pole){
+            if($('.cell'+i+'_'+j).css('background-color') !== 'rgb(255, 0, 0)')
+                $('.cell'+i+'_'+j).css('background-color', 'red')
+            else
+                $('.cell'+i+'_'+j).css('background-color', '#00FF00')
+        }
+
+        function win(pole){
+            for(var i=0;i<{{h}};i++)
+            {
+                for(var j=0;j<{{w}};j++)
+                {
+                    if(pole[i][j] === -1)
+                        if($('.cell'+i+'_'+j).css('background-color') !== 'rgb(255, 0, 0)'){
+                            return false;
+                    }
+                }
+            }
+            $('.gameImg').empty();
+            $('.gameImg').append('<win><p>Вы выйграли</p></win>');
+        }
+
+        function lose(i, j, pole){
+            if(pole[i][j] === -1 ){
+                $('.gameImg').empty();
+                $('.gameImg').append('<error><p>Вы проиграли</p></error>');
+
+            }
+        }
+
+      $(document).ready(function(){ {# Основная функция создания поля #}
+        document.oncontextmenu = function() {return false;};
+        $('.gameImg').css({'height': 50*{{w}}+'px', 'width': 50*{{h}}+'px'})
+
+        for(var i=0;i<{{h}};i++)
+        {
+            for(var j=0;j<{{w}};j++)
+            {
+                var br = ((i+j)%2==0? 1 : 0.9)
+                $('.gameImg').append('<div class="cell'+i+'_'+j+'"></div>');
+                $('.cell'+i+'_'+j).css({'background-color': '#00FF00',
+                                        'filter': 'brightness('+br+')',
+                                        'left': (i*50)+'px',
+                                        'top': (j*50)+'px'});
+                $('.cell'+i+'_'+j).click(function(event){
+                    var s = event.target.classList[0].indexOf('_');
+                    var x = Number(event.target.classList[0].slice(4, s));
+                    var y = Number(event.target.classList[0].slice(s+1));
+                    c(x, y, pole);
+                    lose(x, y, pole);
+                });
+            }
+        }
+        $(document).mousedown(function(event){
+            if( event.button == 2 ) {
+                var s = event.target.classList[0].indexOf('_');
+                var x = Number(event.target.classList[0].slice(4, s));
+                var y = Number(event.target.classList[0].slice(s+1));
+                f(x, y, pole);
+                console.log(win(pole));
+            }
+            return true;
+        });
+      });
+    </script>
+    <div class="gameImg">
+
+
+    </div>
+{% endblock %}

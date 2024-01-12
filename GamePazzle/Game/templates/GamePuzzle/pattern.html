@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon " type="image/png" href="{% static 'GamePuzzle/ico/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'GamePuzzle/css/pattern.css' %}">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.main').mouseover(function(){
+
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="icon">
+            <img src="{% static 'GamePuzzle/ico/favicon.ico' %}" width="65px" height="65px">
+        </div>
+        <div class="button">
+            <a class="aMain text" href="/Puzzle">Главная</a>
+            <a class="aUpload text" href="uploadIMG">Загрузить</a>
+        </div>
+    </div>
+    <div class="main">
+        {% block main %}
+        {% endblock %}
+    </div>
+</body>
+</html>

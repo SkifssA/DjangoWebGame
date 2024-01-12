@@ -1,0 +1,68 @@
+{% extends 'gamePuzzle/pattern.html' %}
+{% load static %}
+{% block title %}GamePuzzle{% endblock %}
+{% block main%}
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <style>
+      div{
+        position:absolute;
+      }
+        .gameImg{
+            position: relative;
+        }
+    </style>
+    <script type="text/javascript">
+      $(document).ready(function(){ {# Основная функция создания пятнашек #}
+        const X = {{ width }};
+        const IMG = {{ files }};
+        const H = {{ width_cell }};
+        const W = {{ height_cell }};
+        function generateArray(length){ {# Генерация списка значений #}
+          var r = []
+          for(var i=0;i<length;i++){
+            r.push(i);
+          }
+          return r
+        }
+        function randOrd(){return (Math.round(Math.random())-0.5);} {# Функция для перемешивания списка #}
+        coordinates = generateArray(IMG).sort(randOrd);{# Изначальные позиции картинок #}
+        coordinates_win = generateArray(IMG); {# Выйграшная позиция #}
+        for(var i=0;i<IMG;i++){ {# Создание drop для взаимодействия с плитками #}
+          $('.gameImg').css({'height':(H*IMG/X+(IMG/X-1)*5)+'px', 'width':(W*X+(X-1)*5)+'px', 'left':'50%', 'transform':'translate(-50%, 0)'});
+          $('.gameImg').append('<div class="drop'+i+'"></div>');
+          $('.drop'+i).css({'width': W+'px', 'height':H+'px', 'top':(H + 5)*parseInt(i/X), 'left':(W + 5)*(i%X)});
+          $('.drop'+i).droppable({
+            drop:function(event, ui){ {# Анимации для перемещения плиток #}
+              drop = Number(event.target.classList[0].slice(4));
+              img_1 = Number(ui.helper.context.classList[0].slice(3));
+              img_2 = coordinates.indexOf(drop);
+              $('.img'+img_1).animate({'top':(H + 5)*parseInt(coordinates[img_2]/X),'left':(W + 5)*(coordinates[img_2]%X)});
+              $('.img'+img_2).animate({'top':(H + 5)*parseInt(coordinates[img_1]/X),'left':(W + 5)*(coordinates[img_1]%X)});
+              $('.ui-draggable-dragging').css("display", "none");
+              temp = coordinates[img_1];
+              coordinates[img_1] = coordinates[img_2];
+              coordinates[img_2] = temp;
+              setTimeout(function(){ {# Действия после победы #}
+                if(coordinates.toString() === coordinates_win.toString()){
+                  for(var i=0;i<IMG;i++){
+                    $('.img'+i).animate({'top':(H-1)*parseInt(coordinates[i]/X) + parseInt((IMG/X-1)*5/2),'left':(W-1)*(coordinates[i]%X) + parseInt((X-1)*5/2)})
+                  }
+                }
+              }, 500);
+            }
+          });
+        }
+        for(var i=0;i<IMG;i++){ {# Выставление самих плиток #}
+        var s = ''
+          $('.gameImg').append('<div class="img'+i+'"><img src="/static/GamePuzzle/img/'+(i+1)+'.{{type_file}}" alt=""></div>');
+          $('.img'+i).css({'top':(H + 5)*parseInt(coordinates[i]/X),'left':(W + 5)*(coordinates[i]%X)})
+          $('.img'+i).draggable({revert:true, helper:'clone'});
+        }
+      });
+    </script>
+    <div class="gameImg">
+
+    </div>
+{% endblock %}

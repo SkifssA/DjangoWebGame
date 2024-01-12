@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon " type="image/png" href="{% static 'GamePuzzle/ico/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'GamePuzzle/css/pattern.css' %}">
+    <style>
+        p, label{
+            font-size: 25px;
+            font-family: 'Impact';
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="icon">
+            <img src="{% static 'GamePuzzle/ico/favicon.ico' %}" width="65px" height="65px">
+        </div>
+        <div class="button">
+            <a class="aMain text" href="/Sapper">Главная</a>
+            <a class="aMain text" href="setting">Своя игра</a>
+        </div>
+    </div>
+    <div class="main">
+        {% block main %}
+        {% endblock %}
+    </div>
+</body>
+</html>
