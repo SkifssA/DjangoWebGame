@@ -1,0 +1,211 @@
+{% extends 'sapper/pattern.html' %}
+{% load static %}
+{% block title %}Sapper{% endblock %}
+{% block main%}
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <style>
+        .gameImg{
+            position: absolute;
+            z-index: 1;
+        }
+        .pole{
+            position: absolute;
+            height: 32px;
+            width: 32px;
+            background-size: 100%;
+        }
+
+        .towerType1{
+
+        }
+        .towerType2{
+
+        }
+        .towerType3{
+
+        }
+
+        .GUI{
+            position: absolute;
+        }
+
+        .backGround{
+            z-index: -1;
+        }
+
+        .coin{
+            position: absolute;
+            left: 90%;
+            top: 5%;
+        }
+
+
+
+    </style>
+    <script type="text/javascript">
+      let interval;
+      let lvl_enemy = 0;
+      let towers;
+      let enemy;
+      let lvl = 1;
+      let coins = 50;
+      function c(pole){
+        for(var i=0;i<{{w}};i++)
+        {
+            for(var j=0;j<{{h}};j++)
+            {
+                $('.gamePole').append('<div class="cell'+i+'_'+j+' pole"></div>');
+                $('.cell'+i+'_'+j).css({'left': (j*32) + 'px',
+                                        'top':  (i*32) + 'px',
+                                        'background-image': 'url(/static/td/img/Road/SpriteSheet.png/'+String(pole[i][j]).padStart(2,'0')+'.png)'});
+            }
+        }
+      }
+
+      function shootTower(){
+        for(i=0;i<towers.length;i++){
+            var shoot = 0
+            for(j=0;j<enemy.length;j++){
+
+                y = towers[i][0]
+                x = towers[i][1]
+
+                if(x <= (enemy[j][0]+1) && x >= (enemy[j][0]-1) && y <= (enemy[j][1]+1) && y >= (enemy[j][1]-1))
+                {
+                    var spellShoot = $('.spell').children().length
+                    $('.spell').append('<div class="spell'+(spellShoot+1)+' pole"></div>')
+                    $('.spell'+(spellShoot+1)).css({'left': $('.towe'+i+'_0').css('left'),
+                                                    'top':  $('.towe'+i+'_0').css('top'),
+                                                    'background-image': 'url(/static/td/img/Road/SpriteSheet.png/26.png)'})
+                    $('.spell'+(spellShoot+1)).animate({'left': (enemy[j][0]*32) + 'px',
+                                                        'top':  (enemy[j][1]*32) + 'px'}, 700, function(){
+                                                        if(enemy[j][4] <= 0 && enemy[j][3] != 'dead'){
+                                                            enemy[j][3] = 'dead';
+                                                            labelUpdate(25);
+                                                        }
+                                                        $(this).remove()
+                                                        })
+                    enemy[j][4]--;
+
+                    if (shoot == towers[i][2]) break
+                    shoot++;
+                }
+            }
+        }
+      }
+
+      function e(){
+        $.ajax({url: 'GoOr'+lvl_enemy+'/', data: {'lvl': lvl,'enemy': enemy}}).done(function(res){
+            enemy = res['enemy']
+            var shoot = true;
+            $('.enemy').empty();
+            if(enemy.length === 0)
+            {
+                clearInterval(interval);
+                interval = 0;
+                enemy = undefined;
+                lvl_enemy++;
+            }
+            if(enemy)
+                for(var i=0;i<enemy.length;i++){
+                    $('.enemy').append('<div class="enemy'+i+' pole"></div>');
+                    if(enemy[i][0] >= 0 && enemy[i][1] >= 0){
+                        $('.enemy'+i).css({'left': (enemy[i][0]*32) + 'px',
+                                           'top':  (enemy[i][1]*32) + 'px',
+                                           'background-image': 'url(/static/td/img/Road/SpriteSheet.png/'+String(enemy[i][2]).padStart(2,'0')+'.png)'});
+                        }
+                }
+            if(towers && enemy) shootTower()
+        });
+      }
+
+      function t (x, y){
+        $.ajax({url:'towers'+x+'.'+y, data: {'towers': towers}}).done(function(res){
+            $('.towers').empty();
+            towers = res['towers']
+            for(var i=0;i<towers.length;i++){
+                $('.towers').append('<div class="towe'+i+'_0 pole towerType'+towers[i][3]+'"></div>')
+                $('.towers').append('<div class="towe'+i+'_1 pole towerType'+towers[i][3]+'"></div>')
+                $('.towe'+i+'_0').css({'top': ((towers[i][0] - 1) * 32)+'px',
+                                        'left': (towers[i][1] * 32)+'px',
+                                        'background-image':'url(/static/td/img/Road/SpriteSheet.png/'+(1 + towers[i][2])+'.png)'})
+                $('.towe'+i+'_1').css({'top': (towers[i][0] * 32)+'px',
+                                        'left': (towers[i][1] * 32)+'px',
+                                        'background-image':'url(/static/td/img/Road/SpriteSheet.png/'+(9 + towers[i][2])+'.png)'})
+            }
+        })
+      }
+
+      function inter(){
+        e();
+        interval = setInterval(e, 1000);
+      }
+
+      function labelUpdate(coin){
+        coins = coins + coin;
+        $('.coin').text(coins);
+      }
+
+      $(document).ready(function(){ {# Основная функция создания поля #}
+        pole = {{pole}}
+        document.oncontextmenu = function() {return false;};
+        $('.backGround').css({'height': 32*({{w}}+3)+'px', 'width': 32*({{h}}+2)+'px'})
+        $('.GUI').css({'height': 32*({{w}}+3)+'px', 'width': 32*({{h}}+2)+'px',
+                       'left': '50%', 'top': '50%',
+                       'transform': 'translate(-50%, 0)'})
+        $('.gameImg').css({'height': 32*{{w}}+'px', 'width': 32*{{h}}+'px',
+                           'left': '50%', 'top': '96%',
+                           'transform': 'translate(-50%, -100%)'})
+        $('.gameImg').append('<div class="gamePole"></div>');
+        c(pole);
+        $('.gameImg').append('<div class="castle"></div>');
+        var castle = {{castle}}
+        for(var i=0;i<6;i = i + 2){
+            $('.castle').append('<div class="castle'+i+' pole"></div>')
+            $('.castle').append('<div class="castle'+(i + 1)+' pole"></div>')
+            $('.castle'+i).css({'left': ((castle[1] + (i/2))*32) + 'px',
+                                   'top': ((castle[0] - 1)*32) + 'px',
+                                   'background-image': 'url(/static/td/img/Road/SpriteSheet.png/'+(6 + (i/2))+'.png)'});
+            $('.castle'+(i+1)).css({'top': (castle[0]*32) + 'px',
+                                   'left': ((castle[1] + (i/2))*32) + 'px',
+                                   'background-image': 'url(/static/td/img/Road/SpriteSheet.png/'+(14 + (i/2))+'.png)'});
+        }
+
+        $('.gameImg').append('<div class="enemy"></div>');
+        inter();
+        $('.gameImg').append('<div class="spell"></div>');
+
+        $('.gameImg').append('<div class="towers"></div>');
+
+
+        $('.gameImg').mousedown(function(event){
+            if( event.button == 2 ) {
+                if(interval === 0) inter();
+            }
+            if (event.button == 0){
+                var x = $('.'+event.target.classList[0]).css('top')
+                var x = Number(x.slice(0, -2) / 32);
+                var y = $('.'+event.target.classList[0]).css('left')
+                var y = Number(y.slice(0, -2) / 32);
+                if(coins >= 50){
+                    labelUpdate(-50);
+                    t(x, y);
+                }
+            }
+            return true;
+        });
+      });
+    </script>
+    <div class="GUI">
+        <img src="/static/td/img/GUI/Box_Orange_Square.png" class="backGround">
+        <div class="gameImg">
+
+        </div>
+        <div class="Icons">
+            <label class="coin">50</label>
+        </div>
+    </div>
+
+{% endblock %}
