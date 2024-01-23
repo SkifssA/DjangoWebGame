@@ -24,5 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('Puzzle/', include('Game.urls')),
     path('Sapper/', include('sapper.urls')),
+    path('TD/', include('TowerDefense.urls')),
     path('', views.main)
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

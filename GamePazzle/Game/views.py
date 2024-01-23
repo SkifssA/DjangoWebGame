@@ -48,7 +48,7 @@ def upload_img(req):
         if form.is_valid():
             form.save()
             open_img = list(Image.objects.filter(name=req.POST['name']).values_list('id'))[0][0]
-            return HttpResponseRedirect(f'/game&={open_img}')
+            return HttpResponseRedirect(f'game&={open_img}')
     else:
         form = ImageForm
     return render(req, 'GamePuzzle/upload.html', {'form': form})

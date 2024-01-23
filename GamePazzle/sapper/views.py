@@ -18,8 +18,6 @@ def main(req, w=10, h=10, count_bomb=10):
             b = 0
             for f in range(-1, 2):
                 for s in range(-1, 2):
-                    print(len(pole), len(pole[0]))
-                    print(i, j)
                     if (f != 0 and s != 0) or pole[i][j] != -1:
                         try:
                             if i+f >= 0 and j + s >= 0:
@@ -42,7 +40,6 @@ def main(req, w=10, h=10, count_bomb=10):
 def setting(req):
     if req.method == 'POST':
         w, h, count_bomb = req.POST['w'], req.POST['h'], req.POST['bomb']
-        print(w, h, count_bomb)
         return main(req, int(h), int(w), int(count_bomb))
 
     return render(req, 'sapper/setting.html')
